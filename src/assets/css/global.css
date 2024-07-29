@@ -1,0 +1,136 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,opsz,wght@0,8..144,100..900;1,8..144,100..900&display=swap');
+
+* {
+  font-family: 'Outfit', sans-serif;
+}
+
+.poppins {
+ font-family: "Poppins", sans-serif;
+ font-optical-sizing: auto;
+}
+
+
+html,
+body {
+  @apply overflow-x-hidden;
+  scroll-behavior: smooth;
+  scroll-padding: 12rem;
+  background: var(--light);
+}
+
+select,
+input[type='number'],
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  margin: 0;
+}
+
+select {
+  overflow: hidden;
+  overflow: -moz-hidden-unscrollable;
+  background: url('/down.svg') white;
+  background-repeat: no-repeat;
+  background-position: 97% 50%;
+  z-index: 1;
+}
+
+
+
+* {
+  scrollbar-color: var(--light_primary);
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar:horizontal {
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--light_primary);
+  border-radius: 1px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #8885;
+  border-radius: 1px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8886;
+}
+@media (max-width: 640px) {
+  ::-webkit-scrollbar {
+    width: 3px;
+  }
+}
+
+
+.polkadot{
+	background-color: #ffffff;
+opacity: 1;
+background-image: radial-gradient(#0000006c 1px, #ffffff 0.8px);
+background-size: 16px 16px;
+}
+
+
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.modal-enter-active,
+.modal-leave-active {
+	transition: all 0.23s linear;
+}
+.modal-enter-from,
+.modal-leave-to {
+	opacity: 0;
+	@media screen and (max-width: 640px) {
+		transform: translateY(500px);
+	}
+}
+.slide-enter-active,
+.slide-leave-active {
+	transition: all 0.25s ease;
+}
+.slide-enter-from,
+.slide-leave-to {
+	transform: translateX(-500px);
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: 0.125s opacity ease-out;
+}
+.glide_up-enter-active,
+.glide_up-leave-active {
+	transition: all 0.25s ease-in;
+}
+.glide_up-enter-from,
+.glide_up-leave-to {
+	opacity: 0;
+	transform: translateY(1200px);
+}
+.scale-enter-active,
+.scale-leave-active {
+	transition: all 0.125s linear;
+}
+.scale-enter-from,
+.scale-leave-to {
+	opacity: 0;
+	transform: scale(0.5);
+}

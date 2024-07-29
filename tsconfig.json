@@ -1,0 +1,11 @@
+{
+	"compilerOptions": {
+		"lib": [
+			"ESNext",
+			"WebWorker",
+			"DOM"
+		],
+		"noImplicitAny": false,
+	},
+	"extends": "./.nuxt/tsconfig.json"
+}

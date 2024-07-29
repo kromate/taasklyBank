@@ -1,0 +1,19 @@
+<svg width="225" height="225" viewBox="0 0 225 225" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        path {
+            stroke: #b7b3e6;
+        }
+
+        /* @media (prefers-color-scheme: dark) {
+            path {
+                stroke: white;
+            }
+        } */
+    </style>
+
+    <rect width="225" height="225" fill="transparent" />
+    <path
+        d="M166.353 140.28L149.138 100.075C143.308 86.4345 132.583 85.8845 125.378 98.8645L114.982 117.62C109.702 127.135 99.8576 127.96 93.0376 119.435L91.8275 117.895C84.7325 108.985 74.7225 110.085 69.6074 120.26L60.1474 139.235C53.4924 152.435 63.1174 168 77.8575 168H148.038C162.338 168 171.963 153.425 166.353 140.28Z"
+        stroke="black" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M85.4473 91.0002C94.5601 91.0002 101.947 83.6128 101.947 74.5001C101.947 65.3874 94.5601 58 85.4473 58C76.3346 58 68.9473 65.3874 68.9473 74.5001C68.9473 83.6128 76.3346 91.0002 85.4473 91.0002Z" stroke="black" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
