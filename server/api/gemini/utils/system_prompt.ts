@@ -7,7 +7,7 @@
 //         Answer any user questions related to their financial data. Below is the user's bank statement: ${userBankStatement}
 // `
 // }
-export const generateSystemPrompt = async (userBankStatement:string) => {
+export const generateSystemPrompt = async () => {
     return `
     You are an AI agent designed to help users understand their bank statements.
      Act as an intelligent financial advisor by identifying spending patterns,

@@ -22,6 +22,8 @@ const userInput = ref('')
 
     })
 
+   console.log('The only comment on prod --- left on purpose', { prompt: sent_user_input, history: conversationHistory.value, statement: userBankStatements.value })
+
     try {
       const { data, error } = await useFetch('/api/gemini/chat', {
         method: 'POST',

@@ -23,13 +23,13 @@ export default defineEventHandler(async (event) => {
       throw new Error('Missing GEMINI API key')
     }
 
-    const { prompt, history, statement } = await readBody(event)
+    const { prompt, history } = await readBody(event)
 
-    if (!prompt || !statement) {
+    if (!prompt) {
       throw new Error('Missing required parameters: prompt or bank statement')
     }
 
-    const systemInst = await generateSystemPrompt(statement)
+    const systemInst = await generateSystemPrompt()
 
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
 
@@ -80,6 +80,3 @@ export default defineEventHandler(async (event) => {
     }
   }
 })
-
-
-// I aim to increase my confidence by improving my fitness level through exercising for 30 minutes, 3 times a week, and adopting a balanced diet for the next 6 months. I will track my progress by taking weekly measurements and noting any positive changes in my physical and mental well-being.
