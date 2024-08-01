@@ -30,6 +30,7 @@
     "lucide-vue-next": "^0.379.0",
     "nuxt": "3.6.5",
     "nuxt-gtag": "1.1.2",
+    "pdfjs-dist": "^4.5.136",
     "radix-vue": "^1.8.2",
     "sass": "^1.69.5",
     "uuid": "^9.0.0",

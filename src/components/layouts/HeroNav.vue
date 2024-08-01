@@ -1,17 +1,17 @@
 <template>
-	<header class="container flex items-center justify-between py-8 md:px-5 px-4 bg-transparent flex-wrap ">
+	<header class="container flex items-center justify-between py-8 md:px-5 px-4 bg-transparent flex-wrap  z-10">
 		<nuxt-link to="/">
 			<img src="/lt.svg" alt="logo" class=" md:w-auto w-32">
 		</nuxt-link>
 
 
-
+		<!--
 		<nuxt-link v-if="!isLoggedIn" to="/auth/login" class="btn-primary">
 			Login
 		</nuxt-link>
 		<nuxt-link v-else to="/auth/login" class="btn-primary">
 			Dashboard
-		</nuxt-link>
+		</nuxt-link> -->
 	</header>
 </template>
 

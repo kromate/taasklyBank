@@ -38,6 +38,8 @@ export default {
         '@': fileURLToPath(new URL('./src', import.meta.url))
       }
     }
+
+
   },
   runtimeConfig: {
      openaiApiKey: process.env.OPENAI_API_KEY

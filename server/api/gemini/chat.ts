@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { systemPrompts } from './utils/system_prompt'
 import { isRateLimited } from './utils/rateLimit'
 import { safetySetting } from './utils/safety'
+import { generateSystemPrompt } from './utils/system_prompt'
 
 
 
@@ -23,25 +23,44 @@ export default defineEventHandler(async (event) => {
       throw new Error('Missing GEMINI API key')
     }
 
-    const { prompt, promptType } = await readBody(event)
-    if (!prompt || !promptType) {
-      throw new Error('Missing required parameters: prompt or promptType')
+    const { prompt, history, statement } = await readBody(event)
+
+    if (!prompt || !statement) {
+      throw new Error('Missing required parameters: prompt or bank statement')
     }
+
+    const systemInst = await generateSystemPrompt(statement)
 
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
-    const systemInst = systemPrompts[promptType]
-    if (!systemInst) {
-      throw new Error(`Invalid promptType: ${promptType}`)
-    }
+
 
     const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
-      generationConfig: { responseMimeType: 'application/json' },
+      model: 'gemini-1.5-pro',
+      generationConfig: { responseMimeType: 'appl' },
       systemInstruction: systemInst,
-      safetySettings: safetySetting
+      safetySettings: safetySetting,
+       tools: [{ codeExecution: {} }]
     })
 
-    const result = await model.generateContent(prompt)
+
+
+    const chatHistory = history.map((msg:Record<string, any>) => ({
+      role: msg.role,
+      parts: msg.parts
+    }))
+
+
+
+
+
+    const chat = model.startChat({
+      history: chatHistory,
+      generationConfig: {
+            maxOutputTokens: 900000
+        }
+    })
+
+    const result = await chat.sendMessage(prompt)
     const response = result.response
     const gemini_response = response.text()
 

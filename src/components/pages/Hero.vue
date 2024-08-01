@@ -18,11 +18,10 @@
 			<p class="max-w-[900px] mx-auto mb-9 font-medium md:text-lg">
 				Upload your bank statement to get personalized financial insights, automated accounting, and a tailored budget plan. Take control of your finances and start building a brighter future!
 			</p>
-			<form class="relative w-full md:max-w-[560px] flex center flex-wrap" @submit.prevent="checkIfGoalIsSmart">
-				<button class="btn bg-dark text-light rounded-full" type="submit">
-					Upload Bank Statement
-				</button>
-			</form>
+
+			<nuxt-link to="/bank" class="btn bg-dark text-light rounded-full mx-4 mb-4" type="submit">
+				Upload Bank Statement
+			</nuxt-link>
 		</div>
 	</main>
 </template>
