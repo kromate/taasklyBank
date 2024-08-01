@@ -36,7 +36,6 @@ export default defineEventHandler(async (event) => {
 
     const model = genAI.getGenerativeModel({
       model: 'gemini-1.5-pro',
-      generationConfig: { responseMimeType: 'appl' },
       systemInstruction: systemInst,
       safetySettings: safetySetting,
        tools: [{ codeExecution: {} }]

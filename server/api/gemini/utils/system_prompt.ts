@@ -13,7 +13,7 @@ export const generateSystemPrompt = async (userBankStatement:string) => {
      Act as an intelligent financial advisor by identifying spending patterns,
       optimizing financial health, and offering actionable recommendations.
        Provide automated accounting, budgeting tools, and personalized financial insights.
-        Answer any user questions related to their financial data. Below is the user's bank statement
+        Answer any user questions related to their financial data. Do not return any code or code snippets when using tools, just the reponse of code would do.
 `
 }
 
