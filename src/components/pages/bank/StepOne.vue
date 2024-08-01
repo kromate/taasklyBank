@@ -1,5 +1,5 @@
 <template>
-	<section class="border border-dark border-dashed bg-light p-4 rounded-md min-w-[445px] center-col gap-4">
+	<section class="border border-dark border-dashed bg-light  rounded-md md:min-w-[445px] max-w-[95%] center-col text-center gap-4 p-4">
 		<FileUp :size="80" :stroke-width="0.75" />
 		<h1 class="text-2xl font-semibold">
 			Upload your bank statement
@@ -17,15 +17,20 @@
 
 			{{ fileName ? 'Change File' : 'Upload File' }}
 		</label>
-		<p v-if="fileName" class="center-col gap-3 mt-12 w-full">
-			<span>Selected file: {{ fileName }}</span>
+		<div v-if="fileName" class="center-col gap-3 mt-12 w-full p-4 ">
+			<p class="w-full text-wrap ">
+				Selected file:
+				<span class="truncate  block">
+					{{ fileName }}
+				</span>
+			</p>
 			<button class="btn bg-dark text-light w-full" :disabled="loading" @click="proceedToChat(extractedText)">
 				<span v-if="!loading">Process Statement</span>
 				<Spinner v-else />
 			</button>
 
-			{{ extractedText }}
-		</p>
+			<!-- {{ extractedText }} -->
+		</div>
 	</section>
 </template>
 

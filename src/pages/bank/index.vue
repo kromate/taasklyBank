@@ -1,5 +1,5 @@
 <template>
-	<main class="center">
+	<main class="center w-full">
 		<PagesBankStepOne v-if="step === 1" />
 		<PagesBankStepTwo v-else />
 	</main>
