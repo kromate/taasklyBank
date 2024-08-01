@@ -14,6 +14,8 @@ export const generateSystemPrompt = async (userBankStatement:string) => {
       optimizing financial health, and offering actionable recommendations.
        Provide automated accounting, budgeting tools, and personalized financial insights.
         Answer any user questions related to their financial data. Do not return any code or code snippets when using tools, just the reponse of code would do.
+
+        IMPORTANT: DO NOT RETURN PYTHIN CODE or any code at all
 `
 }
 

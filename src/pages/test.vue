@@ -6,18 +6,20 @@
 				Upload PDF
 			</button>
 		</form>
-		<div v-if="isLoading" class="loading">
-			Loading PDF pages...
+		<div v-if="logs.length > 0" class="logs">
+			<h3>Processing Logs:</h3>
+			<ul>
+				<li v-for="(log, index) in logs" :key="index">
+					{{ log }}
+				</li>
+			</ul>
 		</div>
 		<div v-if="error" class="error-message">
 			{{ error }}
 		</div>
-		<div v-if="pdfImages.length > 0" class="pdf-preview">
-			<h3>PDF Preview:</h3>
-			<div v-for="(image, index) in pdfImages" :key="index" class="pdf-page">
-				<h4>Page {{ index + 1 }}</h4>
-				<img :src="image" :alt="`PDF Page ${index + 1}`">
-			</div>
+		<div v-if="extractedData.length > 0" class="extracted-data">
+			<h3>Extracted Data:</h3>
+			<pre>{{ JSON.stringify(extractedData, null, 2) }}</pre>
 		</div>
 	</div>
 </template>
@@ -30,9 +32,9 @@ const { loadPdfjs } = usePDFExtractor()
 
 const pdfFileInput = ref<HTMLInputElement | null>(null)
 const selectedFile = ref<File | null>(null)
-const pdfImages = ref<string[]>([])
 const error = ref<string | null>(null)
-const isLoading = ref(false)
+const logs = ref<string[]>([])
+const extractedData = ref<any[]>([])
 
 const handleFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement
@@ -40,7 +42,8 @@ const handleFileChange = (event: Event) => {
   if (files && files.length > 0) {
     selectedFile.value = files[0]
     error.value = null
-    pdfImages.value = []
+    logs.value = []
+    extractedData.value = []
   }
 }
 
@@ -54,11 +57,9 @@ const renderPage = async (pdf: any, pageNum: number, scale: number): Promise<str
     throw new Error('Unable to get canvas context')
   }
 
-  // Set canvas dimensions to match the viewport
   canvas.height = viewport.height
   canvas.width = viewport.width
 
-  // Render PDF page into canvas context
   const renderContext = {
     canvasContext: context,
     viewport
@@ -68,51 +69,84 @@ const renderPage = async (pdf: any, pageNum: number, scale: number): Promise<str
   return canvas.toDataURL('image/png')
 }
 
+const processPage = async (imgData: string, pageNum: number) => {
+  logs.value.push(`Processing page ${pageNum}...`)
+  try {
+    const response = await fetch('/api/gemini/test', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ page: imgData })
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to process page ${pageNum} on server`)
+    }
+
+    const result = await response.json()
+    logs.value.push(`Page ${pageNum} processed successfully`)
+    return result
+  } catch (err) {
+    logs.value.push(`Error processing page ${pageNum}: ${err instanceof Error ? err.message : String(err)}`)
+    throw err
+  }
+}
+
+const parseExtractedData = (rawData: string): any => {
+  console.log(rawData)
+  try {
+    return JSON.parse(rawData)
+  } catch (err) {
+    logs.value.push(`Error parsing JSON: ${err instanceof Error ? err.message : String(err)}`)
+    return { rawText: rawData }
+  }
+}
+
 const uploadPdf = async () => {
   if (!selectedFile.value) return
   error.value = null
-  pdfImages.value = []
-  isLoading.value = true
+  logs.value = []
+  extractedData.value = []
 
   const reader = new FileReader()
   reader.onload = async (e: ProgressEvent<FileReader>) => {
     if (!e.target?.result) {
       error.value = 'Failed to read the file.'
-      isLoading.value = false
       return
     }
 
     const typedarray = new Uint8Array(e.target.result as ArrayBuffer)
 
     try {
-    //   console.log('Loading PDF...')
+      logs.value.push('Loading PDF...')
       const loadingTask = (window as any).pdfjsLib.getDocument(typedarray)
       const pdf = await loadingTask.promise
-    //   console.log('PDF loaded successfully')
+      logs.value.push('PDF loaded successfully')
 
       const totalPages = pdf.numPages
-      const scale = 4 // Increase scale for better quality
+      const scale = 2
 
       for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
-        // console.log(`Rendering page ${pageNum}...`)
+        logs.value.push(`Rendering page ${pageNum}...`)
         const imgData = await renderPage(pdf, pageNum, scale)
-        pdfImages.value.push(imgData)
-        // console.log(`Page ${pageNum} rendered successfully`)
+        logs.value.push(`Page ${pageNum} rendered successfully`)
+
+        const pageData = await processPage(imgData, pageNum)
+        const parsedData = parseExtractedData(pageData)
+        extractedData.value.push(parsedData)
       }
 
-    //   console.log('All pages rendered successfully')
+      logs.value.push('All pages processed successfully')
     } catch (err) {
       console.error('Error processing PDF:', err)
       error.value = `Error processing PDF: ${err instanceof Error ? err.message : String(err)}`
-    } finally {
-      isLoading.value = false
     }
   }
 
   reader.onerror = (err) => {
     console.error('FileReader error:', err)
     error.value = 'Error reading the file.'
-    isLoading.value = false
   }
 
   reader.readAsArrayBuffer(selectedFile.value)
@@ -121,7 +155,7 @@ const uploadPdf = async () => {
 onMounted(async () => {
   try {
     await loadPdfjs()
-    // console.log('pdf.js loaded successfully')
+    logs.value.push('PDF.js loaded successfully')
   } catch (err) {
     console.error('Error loading pdf.js:', err)
     error.value = 'Failed to load PDF processing library.'
@@ -130,29 +164,27 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.pdf-preview {
-  margin-top: 20px;
-}
-
-.pdf-page {
-  margin-bottom: 20px;
-}
-
-.pdf-page img {
-  max-width: 100%;
-  height: auto;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 5px;
-}
-
 .error-message {
   color: red;
   margin-top: 10px;
 }
 
-.loading {
-  margin-top: 10px;
-  font-style: italic;
+.logs {
+  margin-top: 20px;
+  background-color: #f0f0f0;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.extracted-data {
+  margin-top: 20px;
+}
+
+.extracted-data pre {
+  background-color: #f4f4f4;
+  padding: 10px;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 </style>
