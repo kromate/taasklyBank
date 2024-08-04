@@ -10,12 +10,15 @@
 		<ModalBase />
 		<Alert />
 		<div class="flex items-center absolute justify-center gap-5  w-full bottom-4 -z-10">
-			<nuxt-link to="/privacy" class="underline">
+			<!-- <nuxt-link to="/privacy" class="underline">
 				Privacy Policy
 			</nuxt-link>
 			<nuxt-link to="/terms" class="underline">
 				Terms of Service
-			</nuxt-link>
+			</nuxt-link> -->
+			<a href="https://github.com/kromate/taasklyBank" target="_blank" class="underline text-xl">
+				GitHub Repo
+			</a>
 		</div>
 	</div>
 </template>
