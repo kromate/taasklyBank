@@ -64,7 +64,6 @@ const handleFileUpload = async (event: Event) => {
       fileName.value = file.name
 		fileDocument.value = file
 		await extractText()
-		console.log(extractedText)
 	  loading.value = false
 	} else {
 		 loading.value = false

@@ -24,31 +24,34 @@ const loadPdfjs = (): Promise<void> => {
 
 
 
-  const extractText = async (): Promise<void> => {
+const extractText = async (): Promise<void> => {
   if (!file.value || !isPdfjsLoaded.value) return
 
+  const arrayBuffer = await readFileAsArrayBuffer(file.value)
+  const typedarray = new Uint8Array(arrayBuffer)
 
-  const reader = new FileReader()
-  reader.onload = async (e: ProgressEvent<FileReader>) => {
-    if (!e.target?.result) return
+  const pdf = await (window as any).pdfjsLib.getDocument(typedarray).promise
 
+  let fullText = ''
 
-    const typedarray = new Uint8Array(e.target.result as ArrayBuffer)
-
-    const pdf = await (window as any).pdfjsLib.getDocument(typedarray).promise
-
-    let fullText = ''
-
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i)
-      const textContent = await page.getTextContent()
-      const pageText = textContent.items.map((item: any) => item.str).join(' ')
-      fullText += pageText + '\n\n'
-    }
-
-    extractedText.value = fullText
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i)
+    const textContent = await page.getTextContent()
+    const pageText = textContent.items.map((item: any) => item.str).join(' ')
+    fullText += pageText + '\n\n'
   }
-  reader.readAsArrayBuffer(file.value)
+
+  extractedText.value = fullText
+}
+
+// Helper function to read file as ArrayBuffer
+const readFileAsArrayBuffer = (file: File): Promise<ArrayBuffer> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = (e) => resolve(e.target?.result as ArrayBuffer)
+    reader.onerror = (e) => reject(e)
+    reader.readAsArrayBuffer(file)
+  })
 }
 
 
