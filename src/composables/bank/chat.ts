@@ -1,7 +1,7 @@
 import { useAlert } from '@/composables/core/notification'
 
 const userBankStatements = ref('')
-const step = ref(2)
+const step = ref(1)
 const conversationHistory = ref([] as any[])
 const ai_loading = ref(false)
 
