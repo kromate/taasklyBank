@@ -1,5 +1,5 @@
 import { fileURLToPath, URL } from 'node:url'
-import eslintPlugin from 'vite-plugin-eslint'
+// import eslintPlugin from 'vite-plugin-eslint'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import app from './app_config'
 
@@ -31,7 +31,7 @@ export default {
 
     plugins: [
       nodePolyfills(),
-      eslintPlugin({ useEslintrc: true, exclude: ['**/node_modules/**'] })
+      // eslintPlugin({ useEslintrc: true, exclude: ['**/node_modules/**'] })
     ],
     resolve: {
       alias: {
