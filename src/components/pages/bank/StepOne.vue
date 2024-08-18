@@ -24,6 +24,7 @@
 					{{ fileName }}
 				</span>
 			</p>
+			
 			<button class="btn bg-dark text-light w-full" :disabled="loading" @click="proceedToChat(extractedText)">
 				<span v-if="!loading">Process Statement</span>
 				<Spinner v-else />
@@ -63,6 +64,7 @@ const handleFileUpload = async (event: Event) => {
       fileName.value = file.name
 		fileDocument.value = file
 		await extractText()
+		console.log(extractedText)
 	  loading.value = false
 	} else {
 		 loading.value = false

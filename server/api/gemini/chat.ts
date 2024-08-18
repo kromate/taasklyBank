@@ -2,46 +2,13 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { isRateLimited } from './utils/rateLimit'
 import { safetySetting } from './utils/safety'
 import { generateSystemPrompt } from './utils/system_prompt'
+import { getCurrentDateFunctionDeclaration,getUserInfoFunctionDeclaration } from './tools/declaration'
+import { getCurrentDateAndTime, getUuserInfo } from './tools/functions'
 
-const getCurrentDateAndTime = async () => {
-  const date = new Date();
-  return date.toISOString();
-}
 
-const getUuserInfo = async () => { 
-  return { name: 'John Doe', age: 25, occupation: 'Software Engineer' }
-}
 
-const getCurrentDateFunctionDeclaration = {
-  name: "getCurrentDateAndTime",
-  description: "Get the current date and time of the user",
-  parameters: {
-    type: "OBJECT",
-    properties: {
-      format: {
-        type: "STRING",
-        description: "The format of the date (ignored in this implementation)",
-        enum: ["ISO", "UTC", "local"]
-      }
-    },
-    required: []
-  }
-}
 
-const getUserInfoFunctionDeclaration = {
-  name: "getUserInfo",
-  description: "Get the user's information",
-  parameters: {
-    type: "OBJECT",
-    properties: {
-      name: {
-        type: "STRING",
-        description: "The user's name"
-      },
-    },
-    required: []
-  }
-}
+
 
 const functions = {
   getCurrentDateAndTime : getCurrentDateAndTime ,
@@ -110,7 +77,7 @@ export default defineEventHandler(async (event) => {
     const result = await chat.sendMessage(prompt)
     
      let gemini_response = result.response.text()
-
+ 
     const functionCalls = result.response.functionCalls()
 
 

@@ -49,7 +49,7 @@ export const useSignin = () => {
       location.reload()
       useAlert().openAlert({ type: 'SUCCESS', msg: 'Signed out successfully' })
     } catch (err) {
-
+      throw new Error('Error siging out')
     } finally {
       loading.value = false
     }
