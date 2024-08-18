@@ -3,19 +3,18 @@ import { isRateLimited } from './utils/rateLimit'
 import { safetySetting } from './utils/safety'
 import { generateSystemPrompt } from './utils/system_prompt'
 
-const getCurrentDate = async () => {
+const getCurrentDateAndTime = async () => {
   const date = new Date();
   return date.toISOString();
 }
 
 const getUuserInfo = async () => { 
-  console.log('Call to getUuserInfo');
   return { name: 'John Doe', age: 25, occupation: 'Software Engineer' }
 }
 
 const getCurrentDateFunctionDeclaration = {
-  name: "getCurrentDate",
-  description: "Get the current date and time",
+  name: "getCurrentDateAndTime",
+  description: "Get the current date and time of the user",
   parameters: {
     type: "OBJECT",
     properties: {
@@ -45,13 +44,14 @@ const getUserInfoFunctionDeclaration = {
 }
 
 const functions = {
-  getCurrentDate: getCurrentDate,
+  getCurrentDateAndTime : getCurrentDateAndTime ,
   getUserInfo: getUuserInfo
 } as any
 
 export default defineEventHandler(async (event) => {
   try {
     const ip = event.node.req.headers['x-forwarded-for'] as string || event.node.req.socket.remoteAddress as string
+
 
     if (isRateLimited(ip)) {
       throw createError({
@@ -68,72 +68,69 @@ export default defineEventHandler(async (event) => {
     const { prompt, history } = await readBody(event)
 
     if (!prompt) {
-      throw new Error('Missing required parameter: prompt')
+      throw new Error('Missing required parameters: prompt or bank statement')
     }
 
     const systemInst = await generateSystemPrompt()
 
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
 
+
     const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-pro',
-      generationConfig: {
-        maxOutputTokens: 900000
-      },
-      tools: {
+      model: 'gemini-1.5-flash-latest',
+      systemInstruction: systemInst,
+      safetySettings: safetySetting,
+      tools: [{
+        // codeExecution:{}
         //@ts-ignore
-        functionDeclarations: [getCurrentDateFunctionDeclaration, getUserInfoFunctionDeclaration ]
-      }
+        function_declarations: [
+          getCurrentDateFunctionDeclaration, getUserInfoFunctionDeclaration
+        ]
+      }]
     })
 
-    const chatHistory = history.map((msg: Record<string, any>) => ({
+
+
+    const chatHistory = history.map((msg:Record<string, any>) => ({
       role: msg.role,
       parts: msg.parts
     }))
 
+
+
+
+
     const chat = model.startChat({
       history: chatHistory,
       generationConfig: {
-        maxOutputTokens: 900000
-      }
+            maxOutputTokens: 900000
+        }
     })
 
-    // Set up streaming
-    setResponseHeaders(event, {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-    })
+    const result = await chat.sendMessage(prompt)
+    
+     let gemini_response = result.response.text()
 
-    const streamResponse = event.node.res.writeHead(200)
+    const functionCalls = result.response.functionCalls()
 
-    let fullResponse = ''
-    const result = await chat.sendMessageStream(prompt)
 
-    for await (const chunk of result.stream) {
-      const chunkText = chunk.text()
-      fullResponse += chunkText
-      streamResponse.write(chunkText)
-    }
-
-    // Check for function calls in the full response
-    if (fullResponse.includes('function:')) {
-      const functionMatch = fullResponse.match(/function:\s*(\w+)/)
-      if (functionMatch && functionMatch[1] in functions) {
-        const functionName = functionMatch[1]
-        const functionResult = functions[functionName]()
-
-        // Send the function result back to Gemini for further processing
-        const followUpResult = await chat.sendMessage(`The result of calling ${functionName} is: ${functionResult}. Please provide any necessary follow-up or analysis.`)
-        const followUpResponse = followUpResult.response.text()
-
-        streamResponse.write(`data: ${JSON.stringify({ chunk: '\n\nFunction call result:\n' + followUpResponse })}\n\n`)
+    if (functionCalls && functionCalls.length > 0) {
+      for (const call of functionCalls) {
+        if (call.name in functions) {
+          const functionResult = await functions[call.name]()
+          const followUpResult = await chat.sendMessage([{
+            functionResponse: {
+              name: call.name,
+              response: { result: functionResult }
+            }
+          }])
+          
+          gemini_response += '\n\nFunction call result:\n' + followUpResult.response.text()
+        }
       }
     }
 
-
-    streamResponse.end()
-
+    return gemini_response
   } catch (error) {
     console.error('Error in Gemini API handler:', error)
 

@@ -2,109 +2,65 @@ import { useAlert } from '@/composables/core/notification'
 
 const userBankStatements = ref('')
 const step = ref(2)
-const conversationHistory = ref([] as any)
+const conversationHistory = ref([] as any[])
 const ai_loading = ref(false)
-const streamingText = ref<string>('')
 
 export const useChat = () => {
-  const userInput = ref<string>('')
+const userInput = ref('')
 
-  const sendMessage = async () => {
-    if (!userInput.value.trim()) return
 
-    const sentUserInput = userInput.value.trim()
+ const sendMessage = async () => {
+     if (!userInput.value) return
+     const sent_user_input = userInput.value
     userInput.value = ''
     ai_loading.value = true
-    streamingText.value = ''
 
-
+    // Add the user message to the conversation history
     conversationHistory.value.push({
       role: 'user',
-      parts: [{ text: sentUserInput }]
+      parts: [{ text: sent_user_input }]
+
     })
 
-    console.log('The only comment on prod --- left on purpose', {
-      prompt: sentUserInput,
-      history: conversationHistory.value,
-      statement: userBankStatements.value
-    })
+   console.log('The only comment on prod --- left on purpose', { prompt: sent_user_input, history: conversationHistory.value, statement: userBankStatements.value })
 
     try {
-      const response = await fetch('/api/gemini/chat', {
+      const { data, error } = await useFetch('/api/gemini/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          prompt: sentUserInput,
-          history: conversationHistory.value,
-          statement: userBankStatements.value
-        })
+        body: JSON.stringify({ prompt: sent_user_input, history: conversationHistory.value, statement: userBankStatements.value })
       })
+ai_loading.value = false
 
-      if (!response.body) {
-        throw new Error('Streamed response is not supported')
+      if (error.value) {
+        throw new Error(error.value.message)
       }
-
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder('utf-8')
-      let done = false
-      let streamedText = ''
-
-      while (!done) {
-        const { value, done: readerDone } = await reader.read()
-        done = readerDone
-
-        if (value) {
-          streamedText += decoder.decode(value, { stream: !done })
-
-
-          const chunks = streamedText.split('\n')
-          for (let i = 0; i < chunks.length - 1; i++) {
-            const text = chunks[i]
-
-              if (text) {
-                  streamingText.value += text
-                }
-          }
-          streamedText = chunks[chunks.length - 1]
-        }
-      }
-
-
-     if (streamingText.value) {
-        conversationHistory.value.push({
-          role: 'model',
-          parts: [{ text: streamingText.value }]
-        })
-        streamingText.value = ''
-      }
-
-
-      ai_loading.value = false
+      conversationHistory.value.push({
+        role: 'model',
+        parts: [{ text: data.value }]
+      })
     } catch (error) {
       ai_loading.value = false
-      console.error('Error sending message:', error)
-      useAlert().openAlert({ type: 'ERROR', msg: 'Error sending message' })
+        console.error('Error sending message:', error)
+        useAlert().openAlert({ type: 'ERROR', msg: 'Error sending message' })
     }
-  }
+ }
 
-  return { userInput, conversationHistory, sendMessage, ai_loading, streamingText }
+    return { userInput, conversationHistory, sendMessage, ai_loading }
 }
 
-export const usePageLogic = () => {
-  const proceedToChat = (extractedPDF: string) => {
-    userBankStatements.value = extractedPDF
 
-    if (!conversationHistory.value.length) {
-      conversationHistory.value.push({
-        role: 'user',
-        parts: [{ text: `Here is my bank statement: ${userBankStatements.value}` }]
-      })
+export const usePageLogic = () => {
+    const proceedToChat = (extractedPDF:string) => {
+      userBankStatements.value = extractedPDF
+         if (!conversationHistory.value.length) {
+    conversationHistory.value.push({
+      role: 'user',
+      parts: [{ text: `Here is my bank statement: ${userBankStatements.value}` }]
+    })
+   }
+
+        step.value = 2
     }
 
-    step.value = 2
-  }
-
-  return { proceedToChat, step }
+    return { proceedToChat, step }
 }
